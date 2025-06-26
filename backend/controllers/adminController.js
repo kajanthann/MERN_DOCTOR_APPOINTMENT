@@ -17,14 +17,10 @@ const addDoctor = async (req, res) => {
             fees,
             address,
             phone,
-            time
         } = req.body;
 
         const imageFile = req.file;
 
-        if (!name || !email || !password || !speciality || !degree || !experience || !about || !available || !fees || !address || !phone || !imageFile) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
 
         if (!validator.isEmail(email)) {
             return res.status(400).json({ success: false, message: "Please enter a valid email" });
