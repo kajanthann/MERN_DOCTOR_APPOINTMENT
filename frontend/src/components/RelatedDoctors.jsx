@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 const RelatedDoctors = ({docId,speciality}) => {
 
-    const {doctors} = useContext(AppContext)
+    const {doctors,backendUrl} = useContext(AppContext)
     const navigate = useNavigate()
 
     const [relDocs,setReldocs] = useState([])
@@ -23,7 +23,7 @@ const RelatedDoctors = ({docId,speciality}) => {
         <div className='w-full grid lg:grid-cols-5  md:grid-cols-3 sm:grid-cols-2 gap-4 pt-5 gap-t-6 px-3 sm:px-0'>
             {relDocs.slice(0,5).map((item,index)=>(
                 <div onClick={()=>{navigate(`/appointment/${item._id}`); scrollTo(0,0) }} className='border border-blue-800 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500' key={index}>
-                    <img className='bg-blue-50' src={item.image} alt="" />
+                    <img className='bg-blue-50' src={`${backendUrl}/uploads/${item.image}`} alt="" />
                     <div className='p-4'>
                         <div className='flex items-center gap-2 text-sm text-center text-green-500'>
                             <p className='w-2 h-2 bg-green-500 rounded-full'></p><p>Available</p>

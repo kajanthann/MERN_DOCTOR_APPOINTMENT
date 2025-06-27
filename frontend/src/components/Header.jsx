@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const Header = () => {
   const navicate = useNavigate();
-
+  const {token,setToken} = useContext(AppContext)
   const [Showmenu, setShowmenu] = useState(false);
-  const [Token, setToken] = useState(true);
+
+  const logOut = () => {
+    setToken(false);
+    localStorage.removeItem('token');
+  }
+
   return (
     <div className="flex items-center justify-between border-b border-b-gray-600 py-2">
       <img onClick={() => navicate("/")} src={assets.logo} alt="" />
@@ -29,7 +35,7 @@ const Header = () => {
         </NavLink>
       </ul>
       <div className="flex justify-end">
-        {Token ? (
+        {token ? (
           <div className="flex items-center gap-2 cursor-pointer group relative:">
             <img className="w-8 rounded-full" src={assets.profile_pic} alt="" />
             <h1 className="hidden md:block">UserName</h1>
@@ -48,7 +54,7 @@ const Header = () => {
                   My-Appointment
                 </p>
                 <p
-                  onClick={() => setToken(false)}
+                  onClick={logOut}
                   className="hover:text-black cursor-pointer"
                 >
                   LogOut

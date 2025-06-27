@@ -2,13 +2,13 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/home'
 import Doctors from './pages/doctors'
-import Login from './pages/login'
+import Login from './pages/Login'
 import MyAppointment from './pages/MyAppointment'
 import Myprofile from './pages/myprofile'
 import Contact from './pages/contact'
 import About from './pages/about'
 import Appointment from './pages/Appointment'
-import Header from './components/header'
+import Header from './components/Header'
 import Footer from './components/Footer'
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -17,7 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const App = () => {
   return (
     <div className='mx-4 sm:mx-[8%]'>
-      <ToastContainer />
+      <ToastContainer position="top-center" autoClose={2000} />
       <Header />
       <Routes>
         <Route path='/' element={<Home />}/>
