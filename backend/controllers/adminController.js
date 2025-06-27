@@ -73,8 +73,19 @@ const loginAdmin = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }
 
-export { addDoctor,loginAdmin };
+// api to get doctors list in admin panel
+const allDoctors = async (req,res) => {
+    try {
+        const doctors = await doctorModel.find({}).select('-password');
+        res.status(200).json({ success: true, doctors });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export { addDoctor,loginAdmin,allDoctors };

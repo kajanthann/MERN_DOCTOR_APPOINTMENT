@@ -32,7 +32,7 @@ const Header = () => {
         {Token ? (
           <div className="flex items-center gap-2 cursor-pointer group relative:">
             <img className="w-8 rounded-full" src={assets.profile_pic} alt="" />
-            <img className="w-2.5" src={assets.dropdown_icon} alt="" />
+            <h1 className="hidden md:block">UserName</h1>
             <div className="top-0 absolute right-0 pt-14 font-medium text-gray-600 z-20 hidden group-hover:block">
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 me-10 p-4">
                 <p
@@ -65,44 +65,67 @@ const Header = () => {
           </button>
         )}
         {/* Menu Icon */}
-<img
-  onClick={() => setShowmenu(true)}
-  className="w-6 md:hidden cursor-pointer"
-  src={assets.menu_icon}
-  alt="Open Menu"
-/>
+        <img
+          onClick={() => setShowmenu(true)}
+          className="w-6 md:hidden cursor-pointer"
+          src={assets.menu_icon}
+          alt="Open Menu"
+        />
 
-{/* Sidebar Menu */}
-<div
-  className={`${
-    Showmenu ? "fixed w-full" : "h-0 w-0"
-  } md:hidden right-0 top-0 bottom-0 overflow-hidden z-20 bg-white transition-all`}
->
-  <div className="flex items-center justify-between px-5 py-6">
-    <img className="w-36" src={assets.logo} alt="Logo" />
-    <img
-      className="w-7 cursor-pointer"
-      onClick={() => setShowmenu(false)}
-      src={assets.cross_icon}
-      alt="Close Menu"
-    />
-  </div>
-  <ul className="flex flex-col items-center gap-2 mt-5 px-7 text-lg font-medium">
-    <NavLink onClick={() => {setShowmenu(false);scrollTo(0,0)}} to="/">
-      <p>Home</p>
-    </NavLink>
-    <NavLink onClick={() => {setShowmenu(false);scrollTo(0,0)}} to="/doctors">
-      <p>All Doctors</p>
-    </NavLink>
-    <NavLink onClick={() => {setShowmenu(false);scrollTo(0,0)}} to="/about">
-      <p>About</p>
-    </NavLink>
-    <NavLink onClick={() => {setShowmenu(false);scrollTo(0,0)}} to="/contact">
-      <p>Contact</p>
-    </NavLink>
-  </ul>
-</div>
-
+        {/* Sidebar Menu */}
+        <div
+          className={`${
+            Showmenu ? "fixed w-full" : "h-0 w-0"
+          } md:hidden right-0 top-0 bottom-0 overflow-hidden z-20 bg-white transition-all`}
+        >
+          <div className="flex items-center justify-between px-5 py-6">
+            <img className="w-36" src={assets.logo} alt="Logo" />
+            <img
+              className="w-7 cursor-pointer"
+              onClick={() => setShowmenu(false)}
+              src={assets.cross_icon}
+              alt="Close Menu"
+            />
+          </div>
+          <ul className="flex flex-col items-center gap-2 mt-5 px-7 text-lg font-medium">
+            <NavLink
+              onClick={() => {
+                setShowmenu(false);
+                scrollTo(0, 0);
+              }}
+              to="/"
+            >
+              <p>Home</p>
+            </NavLink>
+            <NavLink
+              onClick={() => {
+                setShowmenu(false);
+                scrollTo(0, 0);
+              }}
+              to="/doctors"
+            >
+              <p>All Doctors</p>
+            </NavLink>
+            <NavLink
+              onClick={() => {
+                setShowmenu(false);
+                scrollTo(0, 0);
+              }}
+              to="/about"
+            >
+              <p>About</p>
+            </NavLink>
+            <NavLink
+              onClick={() => {
+                setShowmenu(false);
+                scrollTo(0, 0);
+              }}
+              to="/contact"
+            >
+              <p>Contact</p>
+            </NavLink>
+          </ul>
+        </div>
       </div>
     </div>
   );
