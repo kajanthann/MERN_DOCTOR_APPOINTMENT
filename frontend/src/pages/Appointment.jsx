@@ -1,25 +1,34 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
 import RelatedDoctors from "../components/RelatedDoctors";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const Appointment = () => {
   const { docId } = useParams();
-  const { doctors, currencySymbol,backendUrl } = useContext(AppContext);
+  const { doctors, currencySymbol, backendUrl, token, getAllDoctors } =
+    useContext(AppContext);
+
   const [docInfo, setDocInfo] = useState(null);
   const [docSlots, setDocSlots] = useState([]);
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotTime, setSlotTime] = useState("");
+  const navigate = useNavigate();
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const fetchDocInfo = () => {
+  // Load selected doctor details
+  useEffect(() => {
     const selectedDoc = doctors.find((doc) => doc._id === docId);
-    setDocInfo(selectedDoc);
-  };
+    setDocInfo(selectedDoc || null);
+  }, [doctors, docId]);
 
-  const getAvailableSlots = () => {
+  // Generate available slots for the next 7 days
+  useEffect(() => {
+    if (!docInfo) return;
+
     const today = new Date();
     const generatedSlots = [];
 
@@ -54,17 +63,66 @@ const Appointment = () => {
     }
 
     setDocSlots(generatedSlots);
-  };
-
-  useEffect(() => {
-    fetchDocInfo();
-  }, [doctors, docId]);
-
-  useEffect(() => {
-    if (docInfo) getAvailableSlots();
+    setSlotIndex(0);
+    setSlotTime("");
   }, [docInfo]);
 
-  if (!docInfo) return null;
+  // Book Appointment API Call
+  const bookAppointment = async () => {
+    if (!token) {
+      toast.warn("Please login to book an appointment.");
+      return navigate("/login");
+    }
+
+    if (!slotTime) {
+      toast.error("Please select a slot time.");
+      return;
+    }
+
+    try {
+      const slotObj = docSlots[slotIndex].find(
+        (slot) => slot.time === slotTime
+      );
+      if (!slotObj) {
+        toast.error("Invalid slot selected.");
+        return;
+      }
+
+      const date = slotObj.datetime;
+      const slotDate = `${date.getDate()}_${
+        date.getMonth() + 1
+      }_${date.getFullYear()}`;
+
+      const payload = { docId, slotDate, slotTime };
+      console.log("Sending appointment data:", payload);
+
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/book-appointment`,
+        payload,
+        {
+          headers: {
+            token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        getAllDoctors();
+        navigate("/my-appointment");
+      } else {
+        toast.error(data.message || "Booking failed.");
+      }
+    } catch (error) {
+      console.error("Booking error:", error.response?.data || error.message);
+      toast.error(
+        error.response?.data?.message || "Booking failed due to server error."
+      );
+    }
+  };
+
+  if (!docInfo) return <p>Loading doctor info...</p>;
 
   return (
     <div className="p-4">
@@ -83,21 +141,29 @@ const Appointment = () => {
               alt="Verified"
               className="w-5 h-5"
             />
+            <span
+              className={`ml-4 px-2 py-1 rounded-full text-xs font-semibold ${
+                docInfo.available
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {docInfo.available ? "Available" : "Not Available"}
+            </span>
           </h2>
+
           <p className="text-sm text-gray-600 mt-1">
             {docInfo.degree} - {docInfo.speciality}
           </p>
           <p className="text-xs text-blue-600 mt-1 border px-2 py-0.5 w-fit rounded-full">
-            {docInfo.experience}
+            {docInfo.experience} years experience
           </p>
-
           <div className="mt-4">
             <p className="flex items-center gap-1 text-sm text-gray-800 font-medium">
               About <img src={assets.info_icon} alt="Info" className="w-4" />
             </p>
             <p className="text-sm text-gray-600 mt-1">{docInfo.about}</p>
           </div>
-
           <p className="mt-4 text-sm text-gray-700">
             Appointment Fee:{" "}
             <span className="text-blue-700 font-medium">
@@ -119,7 +185,10 @@ const Appointment = () => {
             return (
               <div
                 key={index}
-                onClick={() => setSlotIndex(index)}
+                onClick={() => {
+                  setSlotIndex(index);
+                  setSlotTime("");
+                }}
                 className={`text-center min-w-16 py-3 px-4 rounded-lg cursor-pointer ${
                   index === slotIndex
                     ? "bg-blue-600 text-white"
@@ -153,10 +222,11 @@ const Appointment = () => {
         </div>
 
         <button
-          className="bg-blue-600 text-white px-10 py-3 rounded-full mt-6 hover:bg-blue-700 transition"
-          disabled={!slotTime}
+          onClick={bookAppointment}
+          className="bg-blue-600 text-white px-10 py-3 rounded-full mt-6 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!slotTime || !docInfo.available}
         >
-          Book Appointment
+          {docInfo.available ? "Book Appointment" : "Doctor Not Available"}
         </button>
       </div>
 

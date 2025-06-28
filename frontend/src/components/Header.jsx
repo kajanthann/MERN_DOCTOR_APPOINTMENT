@@ -5,7 +5,7 @@ import { AppContext } from "../context/AppContext";
 
 const Header = () => {
   const navicate = useNavigate();
-  const {token,setToken} = useContext(AppContext)
+  const {token,setToken,userData, backendUrl} = useContext(AppContext)
   const [Showmenu, setShowmenu] = useState(false);
 
   const logOut = () => {
@@ -37,9 +37,18 @@ const Header = () => {
       <div className="flex justify-end">
         {token ? (
           <div className="flex items-center gap-2 cursor-pointer group relative:">
-            <img className="w-8 rounded-full" src={assets.profile_pic} alt="" />
-            <h1 className="hidden md:block">UserName</h1>
-            <div className="top-0 absolute right-0 pt-14 font-medium text-gray-600 z-20 hidden group-hover:block">
+            <img
+                className="w-10 h-10 rounded-full object-cover border"
+                src={
+                  userData?.image
+                    ? `${backendUrl}/uploads/${userData.image}`
+                    : assets.profile_pic
+                }
+                alt="User"
+              />
+            
+            <h1 className="hidden md:block">{userData?.name || "User"}</h1>
+            <div className="top-0 absolute right-15 pt-14 font-medium text-gray-600 z-20 hidden group-hover:block">
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 me-10 p-4">
                 <p
                   onClick={() => navicate("my-profile")}

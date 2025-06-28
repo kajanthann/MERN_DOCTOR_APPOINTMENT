@@ -4,7 +4,7 @@ import Home from './pages/home'
 import Doctors from './pages/doctors'
 import Login from './pages/Login'
 import MyAppointment from './pages/MyAppointment'
-import Myprofile from './pages/myprofile'
+import Myprofile from './pages/MyProfile'
 import Contact from './pages/contact'
 import About from './pages/about'
 import Appointment from './pages/Appointment'
@@ -17,7 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const App = () => {
   return (
     <div className='mx-4 sm:mx-[8%]'>
-      <ToastContainer position="top-center" autoClose={2000} />
+      <ToastContainer autoClose={2000} />
       <Header />
       <Routes>
         <Route path='/' element={<Home />}/>
