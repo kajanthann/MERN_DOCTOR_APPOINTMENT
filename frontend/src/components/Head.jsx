@@ -3,7 +3,7 @@ import { assets } from "../assets/assets";
 
 const Head = () => {
   return (
-    <div className="flex flex-col md:flex-row flex-wrap bg-blue-500 md:px-10 my-14 lg:px-20">
+    <div className="flex flex-col md:flex-row flex-wrap bg-blue-500 rounded-lg md:px-10 my-14 lg:px-20">
       {/* Left Section */}
       <div className="md:w-1/2 flex flex-col items-start gap-4 py-10 m-auto md:py-[8vw] md:mb-[-30px]">
         <p className="text-3xl text-white font-semibold leading-snug">
