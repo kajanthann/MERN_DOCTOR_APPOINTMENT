@@ -4,6 +4,9 @@ import userModel from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import appointmentModel from '../models/appointmentModel.js';
 import doctorModel from '../models/doctorModel.js'; 
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); 
 
 // Register
 const registerUser = async (req, res) => {
@@ -269,6 +272,28 @@ const cancelAppointment = async (req, res) => {
 };
 
 
+// Stripe Payment
+const payment = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
 
+    if (!appointmentData || appointmentData.cancelled) {
+      return res.status(400).json({ success: false, message: "Appointment cancelled or not found" });
+    }
 
-export { registerUser, loginUser, getProfile, updateProfile,Appointment, listAppointment, cancelAppointment };
+    // Create PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: appointmentData.amount * 100, // convert to cents
+      currency: "usd", // change currency if needed
+      metadata: { appointmentId: appointmentData._id.toString() },
+    });
+
+    res.json({ success: true, clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.log("Stripe Payment Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { registerUser, loginUser, getProfile, updateProfile,Appointment, listAppointment, cancelAppointment, payment };

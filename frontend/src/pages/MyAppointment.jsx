@@ -113,6 +113,19 @@ const MyAppointment = () => {
     )
   }
 
+  const appointmentStripe = async(appointmentId) => {
+
+    try {
+      const {data} = await axios.post(`${backendUrl}/api/user/payment-stripe`, {appointmentId}, {headers: {token}})
+      if(data.success){
+        console.log(data.order);
+      }
+    } catch (error) {
+      
+    }
+
+  }
+
   useEffect(() => {
     if (token) getUserAppointments()
   }, [token])
@@ -145,7 +158,7 @@ const MyAppointment = () => {
               <p className="text-gray-600">{item.docData?.address?.line2 || ''}</p>
               <p className="mt-2">
                 <span className="font-medium">Time:</span>{' '}
-                {`${convertDate(item.slotDate)} - ${item.slotTime}`}
+                {`${convertDate(item.slotDate)} / ${item.slotTime}`}
               </p>
                 <p className="md:hidden text-red-600 font-semibold">Appointment Cancelled</p>
             </div>
@@ -156,7 +169,7 @@ const MyAppointment = () => {
                 <p className="hidden md:block text-red-600 font-semibold text-center">Appointment Cancelled</p>
               ) : (
                 <>
-                  <button className="text-sm w-full sm:w-auto py-2 px-4 border rounded-lg hover:bg-black hover:text-white transition-all duration-300">
+                  <button onClick={() => appointmentStripe(item._id)} className="text-sm w-full sm:w-auto py-2 px-4 border rounded-lg hover:bg-black hover:text-white transition-all duration-300">
                     Pay Online
                   </button>
                   <button

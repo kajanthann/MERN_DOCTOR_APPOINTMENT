@@ -2,6 +2,7 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import doctorModel from '../models/doctorModel.js';
 import jwt from 'jsonwebtoken';
+import appointmentModel from '../models/appointmentModel.js';
 
 const addDoctor = async (req, res) => {
     try {
@@ -88,4 +89,54 @@ const allDoctors = async (req,res) => {
     }
 }
 
-export { addDoctor,loginAdmin,allDoctors };
+// get appointments
+const appointmentsAdmin = async (req,res) => {
+    try {
+        const appointments = await appointmentModel.find({})
+        res.status(200).json({ success: true, appointments });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+// cancel appointment
+const adminCancelAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    
+    const appointment = await appointmentModel.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+    
+    // Check if already cancelled
+    if (appointment.cancelled) {
+      return res.status(400).json({ success: false, message: "Appointment is already cancelled" });
+    }
+    
+    // Update appointment as cancelled
+    appointment.cancelled = true;
+    await appointment.save();
+
+    const { docId, slotDate, slotTime } = appointment;
+    const docData = await doctorModel.findById(docId);
+
+    let slots_booked = docData.slots_booked || {};
+    if (slots_booked[slotDate]) {
+      const index = slots_booked[slotDate].indexOf(slotTime);
+      if (index !== -1) {
+        slots_booked[slotDate].splice(index, 1);
+      }
+    }
+    
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+    res.json({ success: true, message: "Appointment cancelled successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { addDoctor,loginAdmin,allDoctors,appointmentsAdmin, adminCancelAppointment };
