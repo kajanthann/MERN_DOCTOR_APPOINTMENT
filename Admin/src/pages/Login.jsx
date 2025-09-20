@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { AdminContext } from '../context/AdminContext';
+import { DoctorContext } from '../context/DoctorContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -8,6 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { setAtoken, backendUrl } = useContext(AdminContext);
+  const { setDToken } = useContext(DoctorContext);
 
   const onsubmitHandler = async (event) => {
     event.preventDefault();
@@ -21,6 +23,7 @@ const Login = () => {
     }
 
     try {
+      // Choose endpoint based on login type
       const endpoint =
         state === 'Admin'
           ? `${backendUrl}/api/admin/login`
@@ -32,15 +35,21 @@ const Login = () => {
       });
 
       if (data.success && data.token) {
-        localStorage.setItem('atoken', data.token);
-        setAtoken(data.token);
+        if (state === 'Admin') {
+          localStorage.setItem('atoken', data.token);
+          setAtoken(data.token);
+        } else {
+          localStorage.setItem('dtoken', data.token);
+          setDToken(data.token);
+          console.log(data.token);
+        }
         toast.success(`${state} login successful`);
       } else {
         toast.error(data.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error.message);
-      toast.error(error.message || 'Login request failed');
+      toast.error(error.response?.data?.message || 'Login request failed');
     }
   };
 
@@ -53,29 +62,33 @@ const Login = () => {
         <p className="text-2xl font-semibold m-auto">
           <span className="text-black">{state}</span> Login
         </p>
+
         <div className="w-full">
           <p>Email</p>
           <input
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none rounded-lg px-4 py-2 transition-all duration-200"
           />
         </div>
+
         <div className="w-full">
           <p>Password</p>
           <input
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
             className="w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:outline-none rounded-lg px-4 py-2 transition-all duration-200"
           />
         </div>
+
         <button className="bg-blue-600 text-white w-full py-2 my-4 rounded-md text-base">
           Login
         </button>
+
         {state === 'Admin' ? (
           <p>
             Doctor Login?{' '}
