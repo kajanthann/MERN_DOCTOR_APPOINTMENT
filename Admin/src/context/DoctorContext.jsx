@@ -9,6 +9,7 @@ const DoctorContextProvider = ({ children }) => {
 
   const [dToken, setDToken] = useState(localStorage.getItem("dtoken") || "");
   const [appointments, setAppointments] = useState([]);
+  const [dashData, setDashData] = useState(false);
 
   // Fetch all appointments for the logged-in doctor
   const getAppointments = async () => {
@@ -71,6 +72,25 @@ const DoctorContextProvider = ({ children }) => {
     }
   };
 
+  const getDashData = async () => {
+    try {
+
+      const { data } = await axios.get(`${backendUrl}/api/doctor/dashboard`, {
+        headers: { dtoken: dToken }, // header must match backend middleware
+      });
+      if (data.success) {
+        setDashData(data.dashData);
+        console.log("Dashboard Data:", data.dashData);
+      }else{
+        toast.error(data.message || "Failed to fetch dashboard data");
+      }
+      
+    } catch (error) {
+      toast.error(error.message);
+      console.error(error);
+    }
+  }
+
   const value = {
     backendUrl,
     dToken,
@@ -80,6 +100,9 @@ const DoctorContextProvider = ({ children }) => {
     getAppointments,
     completeAppointment,
     cancelAppointment,
+    getDashData,
+    dashData,
+    setDashData,
   };
 
   return <DoctorContext.Provider value={value}>{children}</DoctorContext.Provider>;

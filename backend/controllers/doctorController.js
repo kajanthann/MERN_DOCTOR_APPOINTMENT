@@ -109,4 +109,39 @@ const cancelAppointment = async (req, res) => {
   }
 }
 
-export { changeAvailability, doctorList, loginDoctor, appointmentsDoctor, cancelAppointment,markAppointmentCompleted };
+// dashboard data doctor
+const dashboardDataDoctor = async (req, res) => {
+
+  try {
+    
+    const { docId } = req.doctor;
+    const appointments = await appointmentModel.find({ docId });
+    let totalEarnings = 0;
+    appointments.map((item) => {
+      if (item.isCompleted || item.payment) {
+        totalEarnings += item.amount;
+      }
+    })
+
+    let patients = [];
+    appointments.map((item) => {
+      if (!patients.includes(item.userId)) {
+        patients.push(item.userId);
+      }
+    })
+
+    const dashData = {
+      totalEarnings,
+      totalAppointments: appointments.length,
+      Patients: patients.length,
+      latestAppointments : appointments.reverse().slice(0,5)
+    }
+    res.json({ success: true, dashData });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export { changeAvailability, doctorList, loginDoctor, appointmentsDoctor,dashboardDataDoctor, cancelAppointment,markAppointmentCompleted };
