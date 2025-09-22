@@ -10,6 +10,7 @@ const DoctorContextProvider = ({ children }) => {
   const [dToken, setDToken] = useState(localStorage.getItem("dtoken") || "");
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
+  const [profileData, setProfileData] = useState(false);
 
   // Fetch all appointments for the logged-in doctor
   const getAppointments = async () => {
@@ -91,6 +92,47 @@ const DoctorContextProvider = ({ children }) => {
     }
   }
 
+  // Get doctor's profile
+  const getProfileData = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/doctor/profile`, {
+        headers: { dtoken: dToken },
+      });
+      if (data.success) {
+        setProfileData(data.profileData);
+      } else {
+        toast.error(data.message || "Failed to fetch profile data");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  // Update doctor profile (fees, address, available)
+  const updateProfile = async (updatedData) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/doctor/update-profile`,
+        updatedData,
+        { headers: { dtoken: dToken } }
+      );
+
+      if (data.success) {
+        toast.success(data.message || "Profile updated successfully!");
+        await getProfileData();
+        return true;
+      } else {
+        toast.error(data.message || "Failed to update profile");
+        return false;
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || error.message);
+      return false;
+    }
+  };
+
   const value = {
     backendUrl,
     dToken,
@@ -102,7 +144,8 @@ const DoctorContextProvider = ({ children }) => {
     cancelAppointment,
     getDashData,
     dashData,
-    setDashData,
+    setDashData,profileData,
+    getProfileData,updateProfile
   };
 
   return <DoctorContext.Provider value={value}>{children}</DoctorContext.Provider>;
