@@ -1,44 +1,88 @@
 import axios from "axios";
-import { useState } from "react";
-import { createContext } from "react";
+import { useState, createContext } from "react";
 import { toast } from "react-toastify";
 
-export const DoctorContext = createContext()
+export const DoctorContext = createContext();
 
-const DoctorContextProvider = (props) => {
+const DoctorContextProvider = ({ children }) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const [dToken, setDToken] = useState(localStorage.getItem("dtoken") || "");
+  const [appointments, setAppointments] = useState([]);
 
-    const [dToken, setDToken] = useState(localStorage.getItem('dtoken') ? localStorage.getItem('dtoken') : '');
-    const [appointments, setAppointments] = useState([]);
+  // Fetch all appointments for the logged-in doctor
+  const getAppointments = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/doctor/appointments`, {
+        headers: { dtoken: dToken }, // header must match backend middleware
+      });
 
-    const getAppointments = async () => {
-        try {
-            const { data } = await axios.get(`${backendUrl}/api/doctor/appointments`, { headers: { dToken } });
-            if (data.success) {
-                setAppointments(data.appointments.reverse());
-                console.log(data.appointments);
-            }else{
-                toast.error(data.message || 'Failed to fetch appointments');
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to fetch appointments');
-            console.error('Error fetching appointments:', error);
-        }
+      if (data.success) {
+        setAppointments(data.appointments.reverse());
+        console.log("Appointments:", data.appointments);
+      } else {
+        toast.error(data.message || "Failed to fetch appointments");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch appointments");
+      console.error("Error fetching appointments:", error);
     }
+  };
 
-    const value = {
-        backendUrl,
-        dToken, setDToken,
-        setAppointments,appointments,
-        getAppointments,
+  // Mark an appointment as completed
+  const completeAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/doctor/complete-appointment`,
+        { appointmentId },
+        { headers: { dtoken: dToken } }
+      );
+
+      if (data.success) {
+        toast.success(data.message || "Appointment Completed");
+        getAppointments();
+      } else {
+        toast.error(data.message || "Failed to complete appointment");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error completing appointment");
+      console.error("Error completing appointment:", error);
     }
+  };
 
-    return (
-        <DoctorContext.Provider value={value}>
-            {props.children}
-        </DoctorContext.Provider>
-    )
-}   
+  // Cancel an appointment
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/doctor/cancel-appointment`,
+        { appointmentId },
+        { headers: { dtoken: dToken } }
+      );
 
-export default DoctorContextProvider
+      if (data.success) {
+        toast.success(data.message || "Appointment Cancelled");
+        getAppointments();
+      } else {
+        toast.error(data.message || "Failed to cancel appointment");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error cancelling appointment");
+      console.error("Error cancelling appointment:", error);
+    }
+  };
+
+  const value = {
+    backendUrl,
+    dToken,
+    setDToken,
+    appointments,
+    setAppointments,
+    getAppointments,
+    completeAppointment,
+    cancelAppointment,
+  };
+
+  return <DoctorContext.Provider value={value}>{children}</DoctorContext.Provider>;
+};
+
+export default DoctorContextProvider;
